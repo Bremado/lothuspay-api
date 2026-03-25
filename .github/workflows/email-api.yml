@@ -1,0 +1,46 @@
+name: Email API - Docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "email-api/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build email-api
+        run: mvn -pl email-api -am clean package -DskipTests
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./email-api
+          push: true
+          tags: ghcr.io/lothuspay/email-api:latest
+
+      - name: Trigger Portainer Deploy
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK }}

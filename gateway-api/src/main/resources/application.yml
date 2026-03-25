@@ -1,0 +1,68 @@
+jwt:
+  secret: "d9e3a6c7821f904dc66b3c4e5f87b12f5bf0c9e324d7720c4fe9a814c3e52b9f44cbd1d61c09eaa75d2769b47d0e3c6a2d7f0b3c9ce5e8f73ac8bf1f0c93a21d"
+
+internal:
+  secret: ${INTERNAL_SECRET}
+
+logging:
+  level:
+    br.com.nextware.gateway.security: DEBUG
+
+spring:
+  application:
+    name: "lothuspay-gateway-api"
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+  cloud:
+    gateway:
+      default-filters:
+        - PreserveHostHeader
+      httpclient:
+        wiretap: true
+        connect-timeout: 30000      # 30s para conectar
+        response-timeout: 60s       # 60s aguardando resposta
+      forwarded:
+        enabled: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      server:
+        forward-headers-strategy: native
+        webflux:
+          globalcors:
+            corsConfigurations:
+              '[/**]':
+                allowedOrigins: "*"   
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders: "*"
+                exposedHeaders:
+                  - Authorization
+                  - Content-Type
+                allowCredentials: true
+  webflux:
+    multipart:
+      max-in-memory-size: 20MB
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 30MB
+
+  codec:
+    max-in-memory-size: 30MB

@@ -1,0 +1,46 @@
+name: Wallet API - Docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "wallet-api/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build wallet-api
+        run: mvn -pl wallet-api -am clean package -DskipTests
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./wallet-api
+          push: true
+          tags: ghcr.io/lothuspay/wallet-api:latest
+
+      - name: Trigger Portainer Deploy
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK }}
