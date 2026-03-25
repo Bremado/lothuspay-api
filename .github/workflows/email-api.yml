@@ -39,7 +39,7 @@ jobs:
         with:
           context: ./email-api
           push: true
-          tags: ghcr.io/lothuspay/email-api:latest
+          tags: ghcr.io/Bremado/email-api:latest
 
       - name: Trigger Portainer Deploy
         run: |

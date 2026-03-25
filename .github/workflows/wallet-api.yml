@@ -39,7 +39,7 @@ jobs:
         with:
           context: ./wallet-api
           push: true
-          tags: ghcr.io/lothuspay/wallet-api:latest
+          tags: ghcr.io/Bremado/wallet-api:latest
 
       - name: Trigger Portainer Deploy
         run: |
